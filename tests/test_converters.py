@@ -27,6 +27,7 @@ def _convert_field_from_spec(name, type_spec_or_default):
     return convert_pydantic_field(
         _get_field_from_spec(name, type_spec_or_default),
         get_global_registry(PydanticObjectType),
+        name=name
     )
 
 

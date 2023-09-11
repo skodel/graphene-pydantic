@@ -112,6 +112,7 @@ def convert_pydantic_input_field(
 def convert_pydantic_field(
     field: ModelField,
     registry: Registry,
+    name: str,
     parent_type: T.Type = None,
     model: T.Type[BaseModel] = None,
     **field_kwargs,
@@ -142,11 +143,11 @@ def convert_pydantic_field(
     if field_type is None:
         raise ValueError("No field type could be determined.")
 
-    resolver_function = getattr(parent_type, "resolve_" + field.name, None)
+    resolver_function = getattr(parent_type, f"resolve_{name}", None)
     if resolver_function and callable(resolver_function):
         field_resolver = resolver_function
     else:
-        field_resolver = get_attr_resolver(field.name)
+        field_resolver = get_attr_resolver(name)
 
     return Field(field_type, resolver=field_resolver, **field_kwargs)
 

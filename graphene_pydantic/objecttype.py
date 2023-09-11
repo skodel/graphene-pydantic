@@ -47,7 +47,7 @@ def construct_fields(
     for name, field in fields_to_convert:
         print(f"converting [{name}: {type(field)}]")
         converted = convert_pydantic_field(
-            field, registry, parent_type=obj_type, model=model
+            field, registry, name=name, parent_type=obj_type, model=model, name=name
         )
         print('converted field', converted)
         registry.register_object_field(obj_type, name, field)
@@ -152,6 +152,7 @@ class PydanticObjectType(graphene.ObjectType):
                 graphene_field = convert_pydantic_field(
                     pydantic_field,
                     meta.registry,
+                    name=name,
                     parent_type=cls,
                     model=target_type.model,
                 )
