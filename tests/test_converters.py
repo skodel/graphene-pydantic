@@ -66,15 +66,15 @@ def test_default_values():
 def test_builtin_scalars(input, expected):
     field = _convert_field_from_spec("attr", input)
     assert isinstance(field, graphene.Field)
-    assert field.type.of_type == expected
+    assert field.type == expected
     assert field.default_value == input[1]
 
 
 def test_union():
     field = _convert_field_from_spec("attr", (T.Union[int, float, str], 5.0))
-    assert issubclass(field.type.of_type, graphene.Union)
+    assert issubclass(field.type, graphene.Union)
     assert field.default_value == 5.0
-    assert field.type.of_type.__name__.startswith("UnionOf")
+    assert field.type.__name__.startswith("UnionOf")
 
 
 if sys.version_info >= (3, 10):
@@ -85,15 +85,15 @@ if sys.version_info >= (3, 10):
         field = _convert_field_from_spec(
             "attr", (T.Literal["literal1", "literal2", 3], 3)
         )
-        assert issubclass(field.type.of_type, graphene.Union)
+        assert issubclass(field.type, graphene.Union)
         assert field.default_value == 3
-        assert field.type.of_type.__name__.startswith("UnionOf")
+        assert field.type.__name__.startswith("UnionOf")
 
     def test_literal_singleton():
         field = _convert_field_from_spec("attr", (T.Literal["literal1"], "literal1"))
-        assert issubclass(field.type.of_type, graphene.String)
+        assert issubclass(field.type, graphene.String)
         assert field.default_value == "literal1"
-        assert field.type.of_type == graphene.String
+        assert field.type == graphene.String
 
 
 def test_mapping():
@@ -105,34 +105,34 @@ def test_mapping():
 def test_decimal(monkeypatch):
     monkeypatch.setattr(converters, "DECIMAL_SUPPORTED", True)
     field = _convert_field_from_spec("attr", (decimal.Decimal, decimal.Decimal(1.25)))
-    assert field.type.of_type.__name__ == "Decimal"
+    assert field.type.__name__ == "Decimal"
 
     monkeypatch.setattr(converters, "DECIMAL_SUPPORTED", False)
     field = _convert_field_from_spec("attr", (decimal.Decimal, decimal.Decimal(1.25)))
-    assert field.type.of_type.__name__ == "Float"
+    assert field.type.__name__ == "Float"
 
 
 def test_iterables():
     field = _convert_field_from_spec("attr", (T.List[int], [1, 2]))
-    assert isinstance(field.type.of_type, graphene.types.List)
+    assert isinstance(field.type, graphene.types.List)
 
     field = _convert_field_from_spec("attr", (list, [1, 2]))
-    assert field.type.of_type == graphene.types.List
+    assert field.type == graphene.types.List
 
     field = _convert_field_from_spec("attr", (T.Set[int], {1, 2}))
-    assert isinstance(field.type.of_type, graphene.types.List)
+    assert isinstance(field.type, graphene.types.List)
 
     field = _convert_field_from_spec("attr", (set, {1, 2}))
-    assert field.type.of_type == graphene.types.List
+    assert field.type == graphene.types.List
 
     field = _convert_field_from_spec("attr", (T.Tuple[int, float], (1, 2.2)))
-    assert isinstance(field.type.of_type, graphene.types.List)
+    assert isinstance(field.type, graphene.types.List)
 
     field = _convert_field_from_spec("attr", (T.Tuple[int, ...], (1, 2.2)))
-    assert isinstance(field.type.of_type, graphene.types.List)
+    assert isinstance(field.type, graphene.types.List)
 
     field = _convert_field_from_spec("attr", (tuple, (1, 2)))
-    assert field.type.of_type == graphene.types.List
+    assert field.type == graphene.types.List
 
     field = _convert_field_from_spec("attr", (T.Union[None, int], 1))
     assert field.type == graphene.types.Int
