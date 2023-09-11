@@ -28,26 +28,29 @@ def construct_fields(
     Construct all the fields for a PydanticObjectType.
 
     NOTE: Currently simply fetches all the attributes from the Pydantic model
-    `__fields__`. In the future we hope to implement field-level overrides that
+    `model_fields`. In the future we hope to implement field-level overrides that
     we'll have to merge in.
     """
     excluded: T.Tuple[str, ...] = ()
     if exclude_fields:
         excluded = exclude_fields
     elif only_fields:
-        excluded = tuple(k for k in model.__fields__ if k not in only_fields)
+        excluded = tuple(k for k in model.model_fields if k not in only_fields)
 
+    #TODO: have to cast to a list in order to have the ForwardRefs evaluated?
     fields_to_convert = (
-        (k, v) for k, v in model.__fields__.items() if k not in excluded
+        (k, v) for k, v in model.model_fields.items() if k not in excluded
     )
 
+    print(list(fields_to_convert))
     fields = {}
     for name, field in fields_to_convert:
         converted = convert_pydantic_field(
-            field, registry, parent_type=obj_type, model=model
+            field, registry, name, parent_type=obj_type, model=model
         )
         registry.register_object_field(obj_type, name, field)
         fields[name] = converted
+        
     return fields
 
 
@@ -143,10 +146,11 @@ class PydanticObjectType(graphene.ObjectType):
             if hasattr(target_type, "_of_type"):
                 target_type = target_type._of_type
             if isinstance(target_type, Placeholder):
-                pydantic_field = meta.model.__fields__[name]
+                pydantic_field = meta.model.model_fields[name]
                 graphene_field = convert_pydantic_field(
                     pydantic_field,
                     meta.registry,
+                    name,
                     parent_type=cls,
                     model=target_type.model,
                 )

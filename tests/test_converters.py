@@ -20,13 +20,14 @@ from graphene_pydantic.registry import get_global_registry, Placeholder
 def _get_field_from_spec(name, type_spec_or_default):
     kwargs = {name: type_spec_or_default}
     m = create_model("model", **kwargs)
-    return m.__fields__[name]
+    return m.model_fields[name]
 
 
 def _convert_field_from_spec(name, type_spec_or_default):
     return convert_pydantic_field(
         _get_field_from_spec(name, type_spec_or_default),
         get_global_registry(PydanticObjectType),
+        name,
     )
 
 
@@ -71,6 +72,7 @@ def test_builtin_scalars(input, expected):
 
 def test_union():
     field = _convert_field_from_spec("attr", (T.Union[int, float, str], 5.0))
+    print(type(field.type), field, field.type)
     assert issubclass(field.type, graphene.Union)
     assert field.default_value == 5.0
     assert field.type.__name__.startswith("UnionOf")
@@ -176,7 +178,7 @@ def test_self_referencing():
         # nodes: Union['NodeModel', None]
         nodes: T.Optional["NodeModel"]
 
-    NodeModel.update_forward_refs()
+    NodeModel.model_rebuild()
 
     class NodeModelSchema(PydanticObjectType):
         class Meta:  # noqa: too-few-public-methods
