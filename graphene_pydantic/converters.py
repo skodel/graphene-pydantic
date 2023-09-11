@@ -80,6 +80,7 @@ def get_attr_resolver(attr_name: str) -> T.Callable:
 def convert_pydantic_input_field(
     field: fields.FieldInfo,
     registry: Registry,
+    name: str, 
     parent_type: T.Type = None,
     model: T.Type[BaseModel] = None,
     **field_kwargs,
@@ -98,7 +99,7 @@ def convert_pydantic_input_field(
             declared_type, field, registry, parent_type=parent_type, model=model
         ),
     )
-    field_kwargs.setdefault("required", field.is_required)
+    field_kwargs.setdefault("required", field.is_required())
     field_kwargs.setdefault("default_value", field.default)
     # TODO: find a better way to get a field's description. Some ideas include:
     # - hunt down the description from the field's schema, or the schema
@@ -128,10 +129,14 @@ def convert_pydantic_field(
             declared_type, field, registry, parent_type=parent_type, model=model
         ),
     )
-    field_kwargs.setdefault("required", field.is_required)
+
+
+    field_kwargs.setdefault("required", field.is_required())
     field_kwargs.setdefault("default_value", field.default)
     if field.alias:
         field_kwargs.setdefault("name", field.alias)
+    else:
+        field_kwargs.setdefault('name', name)
     # TODO: find a better way to get a field's description. Some ideas include:
     # - hunt down the description from the field's schema, or the schema
     #   from the field's base model
@@ -139,6 +144,8 @@ def convert_pydantic_field(
     field_kwargs.setdefault("description", field.description)
 
     # Handle Graphene 2 and 3
+    
+    
     field_type = field_kwargs.pop("type", field_kwargs.pop("type_", None))
     if field_type is None:
         raise ValueError("No field type could be determined.")
@@ -177,7 +184,7 @@ def convert_pydantic_type(
         # TODO: _should_ Sets remain here?
         return List(graphene_type)
     elif field.shape in SHAPE_MAPPING:
-        raise ConversionError("Don't know how to handle mappings in Graphene.")
+        raise ConversionError("Don't know how to handle mappings in Graphene")
 
 
 def find_graphene_type(

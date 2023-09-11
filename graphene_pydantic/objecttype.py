@@ -47,7 +47,7 @@ def construct_fields(
     for name, field in fields_to_convert:
         print(f"converting [{name}: {type(field)}]")
         converted = convert_pydantic_field(
-            field, registry, name=name, parent_type=obj_type, model=model, name=name
+            field, registry, name=name, parent_type=obj_type, model=model
         )
         print('converted field', converted)
         registry.register_object_field(obj_type, name, field)

@@ -32,7 +32,6 @@ def construct_fields(
     `model_fields`. In the future we hope to implement field-level overrides that
     we'll have to merge in.
     """
-    raise SSS
     excluded: T.Tuple[str, ...] = ()
     if exclude_fields:
         excluded = exclude_fields

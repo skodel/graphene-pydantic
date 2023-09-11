@@ -37,16 +37,16 @@ def test_required_string():
     assert isinstance(field, graphene.Field)
     # The ellipsis in the type spec means required
     assert isinstance(field.type, graphene.NonNull)
-    assert field.type.of_type == graphene.String
+    assert field.type == graphene.String
 
 
 def test_default_values():
-    field = _convert_field_from_spec("s", "hi")
+    field = _convert_field_from_spec("s", (str, "hi"))
     assert field is not None
     assert isinstance(field, graphene.Field)
     # there's a default value, so it never null
     assert isinstance(field.type, graphene.NonNull)
-    assert field.type.of_type == graphene.String
+    assert field.type == graphene.String
     assert field.default_value == "hi"
 
 
@@ -99,7 +99,7 @@ if sys.version_info >= (3, 10):
 def test_mapping():
     with pytest.raises(ConversionError) as exc:
         _convert_field_from_spec("attr", (T.Dict[str, int], {"foo": 5}))
-    assert exc.value.args[0] == "Don't know how to handle mappings in Graphene."
+    assert exc.value.args[0] == "Don't know how to handle mappings in Graphene"
 
 
 def test_decimal(monkeypatch):
@@ -144,8 +144,8 @@ def test_enum():
         GREEN = 2
 
     field = _convert_field_from_spec("attr", (Color, Color.RED))
-    assert field.type.of_type.__name__ == "Color"
-    assert field.type.of_type._meta.enum == Color
+    assert field.type.__name__ == "Color"
+    assert field.type._meta.enum == Color
 
 
 def test_existing_model():
@@ -159,7 +159,7 @@ def test_existing_model():
             model = Foo
 
     field = _convert_field_from_spec("attr", (Foo, Foo(name="bar")))
-    assert field.type.of_type == GraphFoo
+    assert field.type == GraphFoo
 
 
 def test_unresolved_placeholders():

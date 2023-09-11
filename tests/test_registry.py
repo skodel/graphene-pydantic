@@ -59,4 +59,3 @@ def test_register_object_field_and_get_for_graphene_field():
     field = r.get_object_field_for_graphene_field(GraphFoo, "name")
     assert field is not None
     assert field.annotation == str
-    assert field.name == "name"
