@@ -32,6 +32,7 @@ def construct_fields(
     `model_fields`. In the future we hope to implement field-level overrides that
     we'll have to merge in.
     """
+    raise SSS
     excluded: T.Tuple[str, ...] = ()
     if exclude_fields:
         excluded = exclude_fields
@@ -41,11 +42,13 @@ def construct_fields(
     fields_to_convert = (
         (k, v) for k, v in model.model_fields.items() if k not in excluded
     )
+    
+    print("Ffffffff", fields_to_convert)
 
     fields = {}
     for name, field in fields_to_convert:
         converted = convert_pydantic_input_field(
-            field, registry, name, parent_type=obj_type, model=model
+            field=field, registry=registry, name=name, parent_type=obj_type, model=model
         )
         registry.register_object_field(obj_type, name, field)
         fields[name] = converted

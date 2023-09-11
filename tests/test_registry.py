@@ -55,6 +55,7 @@ def test_register_and_get_type_for_model():
 def test_register_object_field_and_get_for_graphene_field():
     Foo, GraphFoo = _get_dummy_classes()
     r = get_global_registry(PydanticObjectType)
+    assert r
     field = r.get_object_field_for_graphene_field(GraphFoo, "name")
     assert field is not None
     assert field.annotation == str

@@ -31,6 +31,7 @@ def construct_fields(
     `model_fields`. In the future we hope to implement field-level overrides that
     we'll have to merge in.
     """
+    
     excluded: T.Tuple[str, ...] = ()
     if exclude_fields:
         excluded = exclude_fields
@@ -42,12 +43,13 @@ def construct_fields(
         (k, v) for k, v in model.model_fields.items() if k not in excluded
     )
 
-    print(list(fields_to_convert))
     fields = {}
     for name, field in fields_to_convert:
+        print(f"converting [{name}: {type(field)}]")
         converted = convert_pydantic_field(
-            field, registry, name, parent_type=obj_type, model=model
+            field, registry, parent_type=obj_type, model=model
         )
+        print('converted field', converted)
         registry.register_object_field(obj_type, name, field)
         fields[name] = converted
         
@@ -150,7 +152,6 @@ class PydanticObjectType(graphene.ObjectType):
                 graphene_field = convert_pydantic_field(
                     pydantic_field,
                     meta.registry,
-                    name,
                     parent_type=cls,
                     model=target_type.model,
                 )
