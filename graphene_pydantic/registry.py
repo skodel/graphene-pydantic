@@ -62,6 +62,7 @@ class Registry(Generic[T]):
     def add_placeholder_for_model(self, model: ModelType):
         if model in self._registry:
             return
+        print(" -------------> the case", model)
         self._registry[model] = Placeholder(model)
 
     def register_object_field(

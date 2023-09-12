@@ -148,6 +148,7 @@ class PydanticObjectType(graphene.ObjectType):
             if hasattr(target_type, "_of_type"):
                 target_type = target_type._of_type
             if isinstance(target_type, Placeholder):
+                print("FOR SURE", name)
                 pydantic_field = meta.model.model_fields[name]
                 graphene_field = convert_pydantic_field(
                     pydantic_field,
@@ -157,6 +158,10 @@ class PydanticObjectType(graphene.ObjectType):
                     model=target_type.model,
                 )
                 fields_to_update[name] = graphene_field
+                print("TO UPDATE", fields_to_update)
                 meta.registry.register_object_field(cls, name, pydantic_field)
+        
+        print("Finished registering", fields_to_update)
         # update the graphene side of things
         meta.fields.update(fields_to_update)
+        print("DONE REGISTERING")

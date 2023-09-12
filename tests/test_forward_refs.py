@@ -33,7 +33,6 @@ class BarModel(pydantic.BaseModel):
 
 
 # # deliberately in this order
-# BarModel.model_rebuild()
 BazModel.model_rebuild()
 
 
@@ -55,7 +54,11 @@ class Baz(PydanticObjectType):
 # yes this is deliberately after too
 FooModel.model_rebuild()
 
+print("before")
+print(dir(Foo._meta))
 Foo.resolve_placeholders()
+print(dir(Foo._meta))
+print('-----------')
 Bar.resolve_placeholders()
 Baz.resolve_placeholders()
 
