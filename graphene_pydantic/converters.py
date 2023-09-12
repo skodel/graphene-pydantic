@@ -64,7 +64,7 @@ def get_attr_resolver(attr_name: str) -> T.Callable:
 def convert_pydantic_input_field(
     field: fields.FieldInfo,
     registry: Registry,
-    name: str, 
+    name: str,
     parent_type: T.Type = None,
     model: T.Type[BaseModel] = None,
     **field_kwargs,
@@ -73,7 +73,7 @@ def convert_pydantic_input_field(
     Convert a Pydantic model field into a Graphene type field that we can add
     to the generated Graphene data model type.
     """
-    
+
     declared_type = field.annotation
     assert declared_type, f"cant find type for {field}"
     field_kwargs.setdefault(
@@ -83,9 +83,9 @@ def convert_pydantic_input_field(
         ),
     )
     field_kwargs.setdefault("required", field.is_required())
-    
+
     default_value = field.get_default()
-    if default_value ==  PydanticUndefined:
+    if default_value == PydanticUndefined:
         default_value = None
 
     field_kwargs.setdefault("default_value", default_value)
@@ -119,17 +119,17 @@ def convert_pydantic_field(
     )
 
     field_kwargs.setdefault("required", field.is_required())
-    
+
     default_value = field.get_default()
-    if default_value ==  PydanticUndefined:
+    if default_value == PydanticUndefined:
         default_value = None
 
     field_kwargs.setdefault("default_value", default_value)
-    
+
     if field.alias:
         field_kwargs.setdefault("name", field.alias)
     else:
-        field_kwargs.setdefault('name', name)
+        field_kwargs.setdefault("name", name)
     # TODO: find a better way to get a field's description. Some ideas include:
     # - hunt down the description from the field's schema, or the schema
     #   from the field's base model
@@ -137,8 +137,7 @@ def convert_pydantic_field(
     field_kwargs.setdefault("description", field.description)
 
     # Handle Graphene 2 and 3
-    
-    
+
     field_type = field_kwargs.pop("type", field_kwargs.pop("type_", None))
     if field_type is None:
         raise ValueError("No field type could be determined.")
@@ -158,7 +157,7 @@ def convert_pydantic_type(
     registry: Registry,
     parent_type: T.Type = None,
     model: T.Type[BaseModel] = None,
-) -> BaseType:    # noqa: C901
+) -> BaseType:  # noqa: C901
     """
     Convert a Pydantic type to a Graphene Field type, including not just the
     native Python type but any additional metadata (e.g. shape) that Pydantic
@@ -167,6 +166,7 @@ def convert_pydantic_type(
     return find_graphene_type(
         type_, field, registry, parent_type=parent_type, model=model
     )
+
 
 def find_graphene_type(
     type_: T.Type,
@@ -179,9 +179,15 @@ def find_graphene_type(
     Map a native Python type to a Graphene-supported Field type, where possible,
     throwing an error if we don't know what to map it to.
     """
-    
+
     assert type_, f"did not get a type for {field}"
-    if type_ in (uuid.UUID, pydantic.types.UUID4, pydantic.types.UUID1, pydantic.types.UUID3, pydantic.types.UUID5) :
+    if type_ in (
+        uuid.UUID,
+        pydantic.types.UUID4,
+        pydantic.types.UUID1,
+        pydantic.types.UUID3,
+        pydantic.types.UUID5,
+    ):
         return UUID
     elif type_ in (str, bytes):
         return String
@@ -220,8 +226,6 @@ def find_graphene_type(
             type_, field, registry, parent_type=parent_type, model=model
         )
     elif isinstance(type_, T.ForwardRef):
-        
-
         # A special case! We have to do a little hackery to try and resolve
         # the type that this points to, by trying to reference a "sibling" type
         # to where this was defined so we can get access to that namespace...

@@ -41,7 +41,7 @@ def construct_fields(
     fields_to_convert = (
         (k, v) for k, v in model.model_fields.items() if k not in excluded
     )
-    
+
     print("Ffffffff", fields_to_convert)
 
     fields = {}

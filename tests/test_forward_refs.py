@@ -33,7 +33,9 @@ class BarModel(pydantic.BaseModel):
 
 
 # deliberately in this order
-BazModel.model_rebuild(force=True, )
+BazModel.model_rebuild(
+    force=True,
+)
 
 
 class Foo(PydanticObjectType):

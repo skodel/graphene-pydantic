@@ -31,14 +31,14 @@ def construct_fields(
     `model_fields`. In the future we hope to implement field-level overrides that
     we'll have to merge in.
     """
-    
+
     excluded: T.Tuple[str, ...] = ()
     if exclude_fields:
         excluded = exclude_fields
     elif only_fields:
         excluded = tuple(k for k in model.model_fields if k not in only_fields)
 
-    #TODO: have to cast to a list in order to have the ForwardRefs evaluated?
+    # TODO: have to cast to a list in order to have the ForwardRefs evaluated?
     fields_to_convert = (
         (k, v) for k, v in model.model_fields.items() if k not in excluded
     )
@@ -50,7 +50,7 @@ def construct_fields(
         )
         registry.register_object_field(obj_type, name, field)
         fields[name] = converted
-        
+
     return fields
 
 
@@ -154,7 +154,7 @@ class PydanticObjectType(graphene.ObjectType):
                     parent_type=cls,
                     model=target_type.model,
                 )
-                print(' ------------ eeeeee', pydantic_field, graphene_field)
+                print(" ------------ eeeeee", pydantic_field, graphene_field)
                 fields_to_update[name] = graphene_field
                 meta.registry.register_object_field(cls, name, pydantic_field)
                 cls._meta.fields[name] = graphene_field
