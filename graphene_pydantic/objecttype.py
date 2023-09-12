@@ -45,11 +45,9 @@ def construct_fields(
 
     fields = {}
     for name, field in fields_to_convert:
-        print(f"converting [{name}: {type(field)}]")
         converted = convert_pydantic_field(
             field, registry, name=name, parent_type=obj_type, model=model
         )
-        print('converted field', converted)
         registry.register_object_field(obj_type, name, field)
         fields[name] = converted
         
@@ -148,7 +146,6 @@ class PydanticObjectType(graphene.ObjectType):
             if hasattr(target_type, "_of_type"):
                 target_type = target_type._of_type
             if isinstance(target_type, Placeholder):
-                print("FOR SURE", name)
                 pydantic_field = meta.model.model_fields[name]
                 graphene_field = convert_pydantic_field(
                     pydantic_field,
@@ -157,11 +154,10 @@ class PydanticObjectType(graphene.ObjectType):
                     parent_type=cls,
                     model=target_type.model,
                 )
+                print(' ------------ eeeeee', pydantic_field, graphene_field)
                 fields_to_update[name] = graphene_field
-                print("TO UPDATE", fields_to_update)
                 meta.registry.register_object_field(cls, name, pydantic_field)
-        
-        print("Finished registering", fields_to_update)
+                cls._meta.fields[name] = graphene_field
         # update the graphene side of things
-        meta.fields.update(fields_to_update)
-        print("DONE REGISTERING")
+        # meta.fields.update(fields_to_update)
+        return meta.fields

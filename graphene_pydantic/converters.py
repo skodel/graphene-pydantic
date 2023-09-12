@@ -19,35 +19,19 @@ from graphene import (
     List,
     String,
     Union,
+    NonNull,
 )
 from graphene.types.base import BaseType
 from graphene.types.datetime import Date, DateTime, Time
 from pydantic import BaseModel
 import pydantic
+from pydantic_core import PydanticUndefined
 from pydantic_core.core_schema import ModelField
 
 from .registry import Registry
 from .util import construct_union_class_name
 
 from pydantic import fields
-
-
-# SHAPE_SINGLETON = (fields.SHAPE_SINGLETON,)
-# SHAPE_SEQUENTIAL = (
-#     fields.SHAPE_LIST,
-#     fields.SHAPE_TUPLE,
-#     fields.SHAPE_TUPLE_ELLIPSIS,
-#     fields.SHAPE_SEQUENCE,
-#     fields.SHAPE_SET,
-# )
-
-# if hasattr(fields, "SHAPE_DICT"):
-#     SHAPE_MAPPING = T.cast(
-#         T.Tuple, (fields.SHAPE_MAPPING, fields.SHAPE_DICT, fields.SHAPE_DEFAULTDICT)
-#     )
-# else:
-#     SHAPE_MAPPING = T.cast(T.Tuple, (fields.SHAPE_MAPPING,))
-
 
 try:
     from graphene.types.decimal import Decimal as GrapheneDecimal
@@ -90,7 +74,6 @@ def convert_pydantic_input_field(
     to the generated Graphene data model type.
     """
     
-    print(type(field))
     declared_type = field.annotation
     assert declared_type, f"cant find type for {field}"
     field_kwargs.setdefault(
@@ -100,7 +83,12 @@ def convert_pydantic_input_field(
         ),
     )
     field_kwargs.setdefault("required", field.is_required())
-    field_kwargs.setdefault("default_value", field.default)
+    
+    default_value = field.get_default()
+    if default_value ==  PydanticUndefined:
+        default_value = None
+
+    field_kwargs.setdefault("default_value", default_value)
     # TODO: find a better way to get a field's description. Some ideas include:
     # - hunt down the description from the field's schema, or the schema
     #   from the field's base model
@@ -130,9 +118,14 @@ def convert_pydantic_field(
         ),
     )
 
-
     field_kwargs.setdefault("required", field.is_required())
-    field_kwargs.setdefault("default_value", field.default)
+    
+    default_value = field.get_default()
+    if default_value ==  PydanticUndefined:
+        default_value = None
+
+    field_kwargs.setdefault("default_value", default_value)
+    
     if field.alias:
         field_kwargs.setdefault("name", field.alias)
     else:
@@ -165,27 +158,15 @@ def convert_pydantic_type(
     registry: Registry,
     parent_type: T.Type = None,
     model: T.Type[BaseModel] = None,
-) -> BaseType:  # noqa: C901
+) -> BaseType:    # noqa: C901
     """
     Convert a Pydantic type to a Graphene Field type, including not just the
     native Python type but any additional metadata (e.g. shape) that Pydantic
     knows about.
     """
-    print("ooook", type_, field)
-    graphene_type = find_graphene_type(
+    return find_graphene_type(
         type_, field, registry, parent_type=parent_type, model=model
     )
-    assert graphene_type
-    print("returned graphene", graphene_type)
-    return graphene_type
-    if field.shape in SHAPE_SINGLETON:
-        return graphene_type
-    elif field.shape in SHAPE_SEQUENTIAL:
-        # TODO: _should_ Sets remain here?
-        return List(graphene_type)
-    elif field.shape in SHAPE_MAPPING:
-        raise ConversionError("Don't know how to handle mappings in Graphene")
-
 
 def find_graphene_type(
     type_: T.Type,
@@ -239,29 +220,27 @@ def find_graphene_type(
             type_, field, registry, parent_type=parent_type, model=model
         )
     elif isinstance(type_, T.ForwardRef):
-        return convert_generic_python_type(
-            type_, field, registry, parent_type=parent_type, model=model
-        )
+        
 
-        # # A special case! We have to do a little hackery to try and resolve
-        # # the type that this points to, by trying to reference a "sibling" type
-        # # to where this was defined so we can get access to that namespace...
-        # sibling = model or parent_type
-        # if not sibling:
-        #     raise ConversionError(
-        #         "Don't know how to convert the Pydantic field "
-        #         f"{field!r} ({field.type_}), could not resolve "
-        #         "the forward reference. Did you call `resolve_placeholders()`? "
-        #         "See the README for more on forward references."
-        #     )
-        # module_ns = sys.modules[sibling.__module__].__dict__
-        # resolved = evaluate_forwardref(type_, module_ns, None)
-        # # TODO: make this behavior optional. maybe this is a place for the TypeOptions to play a role?
-        # if registry:
-        #     registry.add_placeholder_for_model(resolved)
-        # return find_graphene_type(
-        #     resolved, field, registry, parent_type=parent_type, model=model
-        # )
+        # A special case! We have to do a little hackery to try and resolve
+        # the type that this points to, by trying to reference a "sibling" type
+        # to where this was defined so we can get access to that namespace...
+        sibling = model or parent_type
+        if not sibling:
+            raise ConversionError(
+                "Don't know how to convert the Pydantic field "
+                f"{field!r} ({field.type_}), could not resolve "
+                "the forward reference. Did you call `resolve_placeholders()`? "
+                "See the README for more on forward references."
+            )
+        module_ns = sys.modules[sibling.__module__].__dict__
+        resolved = pydantic.evaluate_forwardref(type_, module_ns, None)
+        # TODO: make this behavior optional. maybe this is a place for the TypeOptions to play a role?
+        if registry:
+            registry.add_placeholder_for_model(resolved)
+        return find_graphene_type(
+            resolved, field, registry, parent_type=parent_type, model=model
+        )
     elif issubclass(type_, enum.Enum):
         return Enum.from_enum(type_)
     elif issubclass(type_, (str, bytes)):

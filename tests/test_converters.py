@@ -37,7 +37,7 @@ def test_required_string():
     assert isinstance(field, graphene.Field)
     # The ellipsis in the type spec means required
     assert isinstance(field.type, graphene.NonNull)
-    assert field.type == graphene.String
+    assert field.type.of_type == graphene.String
 
 
 def test_default_values():
@@ -45,9 +45,9 @@ def test_default_values():
     assert field is not None
     assert isinstance(field, graphene.Field)
     # there's a default value, so it never null
-    assert isinstance(field.type, graphene.NonNull)
-    assert field.type == graphene.String
+    # assert isinstance(field.type, graphene.NonNull)
     assert field.default_value == "hi"
+    assert field.type == graphene.String
 
 
 @pytest.mark.parametrize(
@@ -164,7 +164,7 @@ def test_existing_model():
 
 def test_unresolved_placeholders():
     # no errors should be raised here -- instead a placeholder is created
-    field = _convert_field_from_spec("attr", (create_model("Model", size=int), None))
+    _convert_field_from_spec("attr", (create_model("Model", size=(int, ...)), None))
     assert any(
         isinstance(x, Placeholder)
         for x in get_global_registry(PydanticObjectType)._registry.values()

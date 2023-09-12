@@ -46,7 +46,6 @@ class Registry(Generic[T]):
 
     def register(self, obj_type: ObjectType):
         
-        print(f"registerin {obj_type}")
         assert_is_correct_type(obj_type, self._required_obj_type)
 
         assert (
@@ -54,7 +53,6 @@ class Registry(Generic[T]):
         ), "Can't register models linked to another Registry"
         self._registry[obj_type._meta.model] = obj_type
         
-        print(self._registry, "is registry")
 
     def get_type_for_model(self, model: ModelType) -> Optional[Output]:
         return self._registry.get(model)
@@ -62,7 +60,6 @@ class Registry(Generic[T]):
     def add_placeholder_for_model(self, model: ModelType):
         if model in self._registry:
             return
-        print(" -------------> the case", model)
         self._registry[model] = Placeholder(model)
 
     def register_object_field(
@@ -70,15 +67,15 @@ class Registry(Generic[T]):
     ):
         assert_is_correct_type(obj_type, self._required_obj_type)
 
-        print(f"registering fields {obj_type} {field_name} {obj_field}")
         if not field_name or not isinstance(field_name, str):  # pragma: no cover
             raise TypeError(f"Expected a field name, but got: {field_name!r}")
+        
+        print("registering", field_name, obj_type, "--",  obj_field)
         self._registry_object_fields[obj_type][field_name] = obj_field
 
     def get_object_field_for_graphene_field(
         self, obj_type: ObjectType, field_name: str
     ) -> Optional[Field]:
-        print("fields -----> ", obj_type, field_name)
         return self._registry_object_fields.get(obj_type, {}).get(field_name)
 
 
