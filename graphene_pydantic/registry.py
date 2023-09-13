@@ -67,7 +67,6 @@ class Registry(Generic[T]):
         if not field_name or not isinstance(field_name, str):  # pragma: no cover
             raise TypeError(f"Expected a field name, but got: {field_name!r}")
 
-        print("registering", field_name, obj_type, "--", obj_field)
         self._registry_object_fields[obj_type][field_name] = obj_field
 
     def get_object_field_for_graphene_field(

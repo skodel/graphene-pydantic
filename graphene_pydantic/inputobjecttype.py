@@ -42,8 +42,6 @@ def construct_fields(
         (k, v) for k, v in model.model_fields.items() if k not in excluded
     )
 
-    print("Ffffffff", fields_to_convert)
-
     fields = {}
     for name, field in fields_to_convert:
         converted = convert_pydantic_input_field(

@@ -154,7 +154,6 @@ class PydanticObjectType(graphene.ObjectType):
                     parent_type=cls,
                     model=target_type.model,
                 )
-                print(" ------------ eeeeee", pydantic_field, graphene_field)
                 fields_to_update[name] = graphene_field
                 meta.registry.register_object_field(cls, name, pydantic_field)
                 cls._meta.fields[name] = graphene_field
