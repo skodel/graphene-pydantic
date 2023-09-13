@@ -19,7 +19,6 @@ from graphene import (
     List,
     String,
     Union,
-    NonNull,
 )
 from graphene.types.base import BaseType
 from graphene.types.datetime import Date, DateTime, Time

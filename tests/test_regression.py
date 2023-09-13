@@ -14,7 +14,7 @@ from graphene_pydantic.inputobjecttype import PydanticInputObjectType
 
 class AuthorModel(pydantic.BaseModel):
     id: pydantic.UUID4
-    email: pydantic.constr(strip_whitespace=True, to_lower=True, max_length=50)
+    email: pydantic.constr(strip_whitespace=True, to_lower=True, max_length=50)  # type: ignore
     nickname: T.Optional[str] = pydantic.Field("Nicky", description="The nickname")
 
 
@@ -63,26 +63,26 @@ class GraphFoo(PydanticInputObjectType):
         model = Foo
 
 
-class Foo(pydantic.BaseModel):
+class Foo2(pydantic.BaseModel):
     name: str = "FooName"
 
 
-class Bar(pydantic.BaseModel):
+class Bar2(pydantic.BaseModel):
     count: int
 
 
-class FooBar(Foo, Bar):
+class FooBar2(Foo2, Bar2):
     pass
 
 
 class FooBarOutput(PydanticObjectType):
     class Meta:
-        model = FooBar
+        model = FooBar2
 
 
 class FooBarInput(PydanticInputObjectType):
     class Meta:
-        model = FooBar
+        model = FooBar2
 
 
 class Query(graphene.ObjectType):

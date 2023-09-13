@@ -3,7 +3,6 @@ from collections import defaultdict
 from typing import Dict, Generic, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field
-from pydantic.fields import Field
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     from graphene_pydantic import PydanticInputObjectType  # noqa: F401
