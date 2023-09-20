@@ -98,7 +98,7 @@ def convert_pydantic_input_field(
 
 
 def convert_pydantic_field(
-    field: ModelField,
+    field: fields.FieldInfo,
     registry: Registry,
     name: str,
     parent_type: T.Type = None,
@@ -116,10 +116,12 @@ def convert_pydantic_field(
             declared_type, field, registry, parent_type=parent_type, model=model
         ),
     )
-
-    field_kwargs.setdefault("required", field.is_required())
-
     default_value = field.get_default()
+
+    field_kwargs.setdefault(
+        "required", field.is_required() and default_value == PydanticUndefined
+    )
+
     if default_value == PydanticUndefined:
         default_value = None
 
@@ -152,7 +154,7 @@ def convert_pydantic_field(
 
 def convert_pydantic_type(
     type_: T.Type,
-    field: ModelField,
+    field: fields.FieldInfo,
     registry: Registry,
     parent_type: T.Type = None,
     model: T.Type[BaseModel] = None,
@@ -162,6 +164,8 @@ def convert_pydantic_type(
     native Python type but any additional metadata (e.g. shape) that Pydantic
     knows about.
     """
+
+    print("REEEE", (list(field.__rich_repr__())))
     return find_graphene_type(
         type_, field, registry, parent_type=parent_type, model=model
     )

@@ -55,5 +55,5 @@ type Author {
 type NodeModelSchema {
   id: Int!
   name: String!
-  nodes: NodeModelSchema!
+  nodes: NodeModelSchema
 }'''

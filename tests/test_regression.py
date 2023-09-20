@@ -38,7 +38,7 @@ class NodeModel(pydantic.BaseModel):
     id: int
     name: str
     # nodes: Union['NodeModel', None]
-    nodes: T.Optional["NodeModel"]
+    nodes: T.Optional["NodeModel"] = None
 
 
 NodeModel.model_rebuild()
