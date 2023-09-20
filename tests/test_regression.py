@@ -84,7 +84,25 @@ class FooBarInput(PydanticInputObjectType):
     class Meta:
         model = FooBar2
 
+class TestConstrModel(pydantic.BaseModel):
+    title: pydantic.constr(strip_whitespace=True, min_length=2, max_length=100) | None
+    available_categories: T.Optional[pydantic.conlist(
+        min_items=1,
+        # unique_items=True,
+        item_type=pydantic.constr(
+            strip_whitespace=True, min_length=2, max_length=48, to_upper=True
+        ),
+    )] = None
 
+    class Config:
+        frozen = True
+        extras = "forbid"
+      
+
+class TestConstr(PydanticObjectType):
+    class Meta:
+        model = TestConstrModel
+  
 class Query(graphene.ObjectType):
     list_articles = graphene.List(Article)
     a_node = graphene.NonNull(NodeModelSchema, description="the model schema")
@@ -97,5 +115,5 @@ class Query(graphene.ObjectType):
 
 
 def test_schema(snapshot):
-    schema = graphene.Schema(query=Query, types=[GraphFoo, FooBarOutput, FooBarInput])
+    schema = graphene.Schema(query=Query, types=[TestConstr, GraphFoo, FooBarOutput, FooBarInput])
     snapshot.assert_match(str(schema))

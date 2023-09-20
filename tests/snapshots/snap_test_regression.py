@@ -7,9 +7,12 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots[
-    "test_schema 1"
-] = '''input GraphFoo {
+snapshots['test_schema 1'] = '''type TestConstr {
+  title: String
+  availableCategories: [String]
+}
+
+input GraphFoo {
   name: String!
   size: Int!
   color: [[Int]]!
