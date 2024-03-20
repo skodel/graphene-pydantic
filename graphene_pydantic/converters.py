@@ -9,6 +9,11 @@ import typing as T
 import uuid
 from typing import Type, get_origin
 
+from pydantic import types as pydantic_types
+from pydantic import networks as pydantic_networks
+import pydantic_core
+
+
 import graphene
 from graphene import (
     Boolean,
@@ -205,9 +210,8 @@ def find_graphene_type(
     """
 
     # Convert Python 10 UnionType to T.Union
-    if PYTHON10:
-        if isinstance(type_, UnionType):
-            type_ = T.Union[type_.__args__]
+    if PYTHON10 and isinstance(type_, UnionType):
+        type_ = T.Union[type_.__args__]
 
     if type_ == uuid.UUID:
         return UUID
@@ -292,6 +296,18 @@ def find_graphene_type(
         return Int
     elif issubclass(type_, (tuple, list, set)):
         return List
+    elif issubclass(type_, pydantic_types.UuidVersion):
+        return UUID
+    elif issubclass(
+        type_,
+        (
+            pydantic_networks.IPvAnyAddress,
+            pydantic_networks.AnyUrl,
+            pydantic_networks.EmailStr,
+            pydantic_core.Url,
+        ),
+    ):
+        return String
     else:
         raise ConversionError(
             f"Don't know how to convert the Pydantic field {field!r} ({field.annotation})"
@@ -332,7 +348,11 @@ def convert_generic_python_type(
         T.Iterable,
         list,
         set,
-    ) or issubclass(origin, collections.abc.Sequence):
+    ) or (
+        origin != str
+        and type(origin) == type
+        and issubclass(origin, collections.abc.Sequence)
+    ):
         # TODO: find a better way of divining that the origin is sequence-like
         inner_types = getattr(type_, "__args__", [])
         if not inner_types:  # pragma: no cover  # this really should be impossible
@@ -347,12 +367,28 @@ def convert_generic_python_type(
                 inner_type, field, registry, parent_type=parent_type, model=model
             )
         )
-    elif origin in (T.Dict, T.Mapping, collections.OrderedDict, dict) or issubclass(
-        origin, collections.abc.Mapping
+    elif origin in (T.Dict, T.Mapping, collections.OrderedDict, dict) or (
+        type(origin) == type and issubclass(origin, collections.abc.Mapping)
     ):
         raise ConversionError("Don't know how to handle mappings in Graphene.")
-    else:
-        raise ConversionError(f"Don't know how to handle {type_} (generic: {origin})")
+
+    try:
+        # TODO: find a better way of divining that the origin is sequence-like
+        inner_types = getattr(type_, "__args__", [])
+        if not inner_types:  # pragma: no cover  # this really should be impossible
+            raise ConversionError(
+                f"Don't know how to handle {type_} (generic: {origin})"
+            )
+        # Of course, we can only return a homogeneous type here, so we pick the
+        # first of the wrapped types
+        inner_type = inner_types[0]
+        return find_graphene_type(
+            inner_type, field, registry, parent_type=parent_type, model=model
+        )
+    except Exception as e:
+        raise ConversionError(
+            f"Don't know how to handle {type_} (generic: {origin})"
+        ) from e
 
 
 def convert_union_type(
@@ -413,11 +449,10 @@ def convert_literal_type(
 
     internal_meta_cls = type("Meta", (), {"types": graphene_scalar_types})
 
-    union_cls = type(
+    return type(
         construct_union_class_name(
             sorted(scalar_types, key=lambda x: x.__class__.__name__)
         ),
         (Union,),
         {"Meta": internal_meta_cls},
     )
-    return union_cls
