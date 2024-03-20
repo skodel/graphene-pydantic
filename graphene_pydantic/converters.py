@@ -418,10 +418,11 @@ def convert_union_type(
 
     internal_meta_cls = type("Meta", (), {"types": parent_types})
 
-    union_cls = type(
-        construct_union_class_name(inner_types), (Union,), {"Meta": internal_meta_cls}
+    return type(
+        construct_union_class_name(inner_types),
+        (Union,),
+        {"Meta": internal_meta_cls},
     )
-    return union_cls
 
 
 def convert_literal_type(
