@@ -63,19 +63,19 @@ def test_object_type_annotated(snapshot):
 
     class AnnotatedName(BaseModel):
         name: T.Annotated[str, StringConstraints(min_length=2, max_length=256)]
-        name_optional: T.Annotated[
-            str, StringConstraints(min_length=2, max_length=256)
-        ] | None = None
+        name_optional: (
+            T.Annotated[str, StringConstraints(min_length=2, max_length=256)] | None
+        ) = None
 
         scaled_values: T.Annotated[T.List[int], pydantic.Field(min_length=2)]
-        scaled_values_optional: T.Annotated[
-            T.List[int], pydantic.Field(min_length=2)
-        ] | None = None
+        scaled_values_optional: (
+            T.Annotated[T.List[int], pydantic.Field(min_length=2)] | None
+        ) = None
 
         objs: T.Annotated[T.List[Child], pydantic.Field(min_length=2)]
-        optional_objs: T.Annotated[
-            T.List[Child], pydantic.Field(min_length=2)
-        ] | None = None
+        optional_objs: (
+            T.Annotated[T.List[Child], pydantic.Field(min_length=2)] | None
+        ) = None
 
     class GraphAnnotatedName(PydanticObjectType):
         class Meta:

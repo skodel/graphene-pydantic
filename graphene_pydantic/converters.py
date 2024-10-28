@@ -213,7 +213,7 @@ def find_graphene_type(
     if PYTHON10 and isinstance(type_, UnionType):
         type_ = T.Union[type_.__args__]
 
-    if type_ == uuid.UUID:
+    if type_ == uuid.UUID or issubclass(type_, pydantic_types.UuidVersion):
         return UUID
     elif type_ in (str, bytes):
         return String
@@ -296,8 +296,6 @@ def find_graphene_type(
         return Int
     elif issubclass(type_, (tuple, list, set)):
         return List
-    elif issubclass(type_, pydantic_types.UuidVersion):
-        return UUID
     elif issubclass(
         type_,
         (
@@ -348,11 +346,7 @@ def convert_generic_python_type(
         T.Iterable,
         list,
         set,
-    ) or (
-        origin != str
-        and type(origin) == type
-        and issubclass(origin, collections.abc.Sequence)
-    ):
+    ) or (issubclass(origin, collections.abc.Sequence) and origin is not str):
         # TODO: find a better way of divining that the origin is sequence-like
         inner_types = getattr(type_, "__args__", [])
         if not inner_types:  # pragma: no cover  # this really should be impossible

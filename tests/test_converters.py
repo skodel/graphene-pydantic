@@ -241,24 +241,3 @@ def test_convert_optional_annotated_type():
     print(_convert_field_from_spec("attr", (T.Optional[spec], None)))
     int_spec = T.Annotated[int, pydantic.Field(ge=0, le=31)] | None
     _convert_field_from_spec("attr", (int_spec, 1))
-
-
-"""
-tests/test_converters.py::test_convert_optional_annotated_type
-finding graphene type for  typing.Optional[typing.Annotated[str, StringConstraints(strip_whitespace=None, to_upper=None, to_lower=None, strict=None, min_length=2, max_length=256, pattern=None)]] field:   annotation=Union[Annotated[str, StringConstraints], NoneType] required=False
-ORIGIN converting type_ <class 'typing._UnionGenericAlias'> typing.Optional[typing.Annotated[str, StringConstraints(strip_whitespace=None, to_upper=None, to_lower=None, strict=None, min_length=2, max_length=256, pattern=None)]] typing.Union
-typing.Union <class 'typing._SpecialForm'> is oooooooo
-finding graphene type for  typing.Annotated[str, StringConstraints(strip_whitespace=None, to_upper=None, to_lower=None, strict=None, min_length=2, max_length=256, pattern=None)] field:   annotation=Union[Annotated[str, StringConstraints], NoneType] required=False
-ORIGIN converting type_ <class 'typing._AnnotatedAlias'> typing.Annotated[str, StringConstraints(strip_whitespace=None, to_upper=None, to_lower=None, strict=None, min_length=2, max_length=256, pattern=None)] <class 'str'>
-<class 'str'> <class 'type'> is oooooooo
-finding graphene type for  <class 'str'> field:   annotation=Union[Annotated[str, StringConstraints], NoneType] required=False
-<graphene.types.field.Field object at 0x7f5ddde01f00>
-"""
-"""
-tests/test_converters.py::test_convert_optional_annotated_type finding graphene type for  typing.Optional[typing.Annotated[int, FieldInfo(annotation=NoneType, required=True, metadata=[Ge(ge=0), Le(le=31)])]] field:   annotation=Union[Annotated[int, FieldInfo(annotation=NoneType, required=True, metadata=[Ge(ge=0), Le(le=31)])], NoneType] required=False default=1
-ORIGIN converting type_ <class 'typing._UnionGenericAlias'> typing.Optional[typing.Annotated[int, FieldInfo(annotation=NoneType, required=True, metadata=[Ge(ge=0), Le(le=31)])]] typing.Union
-typing.Union <class 'typing._SpecialForm'> is oooooooo
-finding graphene type for  typing.Annotated[int, FieldInfo(annotation=NoneType, required=True, metadata=[Ge(ge=0), Le(le=31)])] field:   annotation=Union[Annotated[int, FieldInfo(annotation=NoneType, required=True, metadata=[Ge(ge=0), Le(le=31)])], NoneType] required=False default=1
-ORIGIN converting type_ <class 'typing._AnnotatedAlias'> typing.Annotated[int, FieldInfo(annotation=NoneType, required=True, metadata=[Ge(ge=0), Le(le=31)])] <class 'int'>
-<class 'int'> <class 'type'> is oooooooo
-"""
