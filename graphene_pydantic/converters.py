@@ -213,7 +213,7 @@ def find_graphene_type(
     if PYTHON10 and isinstance(type_, UnionType):
         type_ = T.Union[type_.__args__]
 
-    if type_ == uuid.UUID or issubclass(type_,(pydantic_types.UuidVersion, )):
+    if type_ == uuid.UUID:
         return UUID
     elif type_ in (str, bytes):
         return String
@@ -296,6 +296,8 @@ def find_graphene_type(
         return Int
     elif issubclass(type_, (tuple, list, set)):
         return List
+    elif issubclass(type_, pydantic_types.UuidVersion):
+        return UUID
     elif issubclass(
         type_,
         (
